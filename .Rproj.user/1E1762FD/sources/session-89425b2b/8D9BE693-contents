@@ -1,0 +1,85 @@
+# Project: Financial Inclusion Analysis
+# Step: Data Cleaning
+
+library(tidyverse)
+library(janitor)
+
+# Load the data from the subfolder
+df_raw <- read_csv("data/micro_ken.csv")
+
+# Create a focused 'analysis' dataset
+# Let's pick some key variables (adjust based on your Findex codebook)
+df_clean <- df_raw %>%
+  clean_names() %>%
+  select(
+    id = wleid,               # Assuming this is ID, check your data!
+    weight = wgt,             # Crucial for Sample Surveys unit
+    mobile_owner = mobileowner,
+    saved = saved,
+    borrowed = borrowed,
+    internet = internetaccess
+  ) %>%
+  # Convert numeric codes (1, 2) to logical/factors if needed
+  mutate(across(c(mobile_owner, internet), ~ ifelse(. == 1, "Yes", "No")))
+
+# Look at your new, clean structure
+glimpse(df_clean)
+
+
+# Load the main wrangling tools
+library(tidyverse)
+
+# Load the cleaning-specific tool (install it first if needed)
+install.packages("janitor") 
+library(janitor)
+
+install.packages("janitor") 
+library(janitor)
+library(tidyverse)
+
+library(janitor)
+library(tidyverse)
+library(janitor)
+
+# This time we use the exact names from your console output
+df_clean <- df_raw %>%
+  clean_names() %>%
+  select(
+    # These match your console screenshot exactly:
+    saved, 
+    borrowed, 
+    remittances, 
+    mobileowner, 
+    internetaccess,
+    pay_utilities
+  ) %>%
+  mutate(across(everything(), ~ case_when(
+    . == 1 ~ "Yes",
+    . == 2 ~ "No",
+    TRUE ~ "NA/Other"
+  )))
+
+# Verify success
+glimpse(df_clean)
+
+library(janitor)
+
+# 1. Prepare data for modeling (convert Yes/No to 1/0)
+df_model <- df_clean %>%
+  mutate(across(everything(), ~ ifelse(. == "Yes", 1, 0)))
+
+# 2. Fit the Logistic Regression Model
+# Logic: Does internet access and remittances predict saving behavior?
+logit_model <- glm(saved ~ internetaccess + remittances, 
+                   data = df_model, 
+                   family = binomial(link = "logit"))
+
+# 3. View the Professional Summary
+summary(logit_model)
+
+# 4. Get "Clean" Coefficients (Odds Ratios) for your GitHub
+library(broom)
+tidy_output <- tidy(logit_model, conf.int = TRUE, exponentiate = TRUE)
+print(tidy_output)
+library(tidyverse)
+library(janitor)
